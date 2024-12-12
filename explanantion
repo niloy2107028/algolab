@@ -1,0 +1,119 @@
+To solve this problem, we need to determine how many ways we can make a sum K using given types of coins, where each type has a maximum number of available coins.
+
+Problem Breakdown:
+Dynamic Programming (DP) Setup:
+This is essentially a variation of the "bounded knapsack problem" where we want to form a sum K using limited quantities of several types of coins. We'll use a dynamic programming approach to solve this problem.
+
+Approach:
+
+We will maintain a dp array where dp[k] stores the number of ways to make the sum k.
+We start with dp[0] = 1 (base case: there's one way to make 0, which is by using no coins).
+For each coin type, we update the dp array considering the maximum number of coins of that type we can use (bounded by the given constraints).
+Transition: For each coin type with value Ai and maximum available coins Ci, we iterate through possible coin counts from 0 to Ci and update the dp array to reflect the number of ways to make different sums using those coins.
+
+Modulo Operation: Since the number of ways can be large, we will take the result modulo 100000007 as specified in the problem.
+
+Steps:
+Initialize dp[0] = 1 since there is one way to make 0 (using no coins).
+For each coin type, update the dp array by trying to add 0, 1, ..., up to Ci coins of that type.
+After processing all coin types, dp[K] will contain the number of ways to make K using the available coins.
+C++ Code:
+cpp
+Copy code
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int MOD = 100000007;
+
+int main() {
+    int T;
+    cin >> T;
+    
+    for (int t = 1; t <= T; ++t) {
+        int n, K;
+        cin >> n >> K;
+        
+        vector<int> A(n), C(n);
+        for (int i = 0; i < n; ++i) {
+            cin >> A[i];  // Coin value
+        }
+        for (int i = 0; i < n; ++i) {
+            cin >> C[i];  // Maximum number of coins of that type
+        }
+        
+        // DP array to store number of ways to make each value
+        vector<int> dp(K + 1, 0);
+        dp[0] = 1; // There's one way to make 0, which is to use no coins
+        
+        // Process each coin type
+        for (int i = 0; i < n; ++i) {
+            int coinValue = A[i];
+            int maxCount = C[i];
+            
+            // We need to update dp from the back to prevent overcounting
+            for (int j = K; j >= 0; --j) {
+                // For each possible number of coins to use from 0 to maxCount
+                for (int count = 1; count <= maxCount && j - count * coinValue >= 0; ++count) {
+                    dp[j] = (dp[j] + dp[j - count * coinValue]) % MOD;
+                }
+            }
+        }
+
+        cout << "Case " << t << ": " << dp[K] << endl;
+    }
+    
+    return 0;
+}
+Explanation:
+Input Parsing:
+We first read the number of test cases T, and then for each test case, we read:
+
+n: the number of coin types.
+K: the target sum we need to form.
+A[]: the array of coin values.
+C[]: the array of the maximum count of each coin that can be used.
+Dynamic Programming Setup:
+We initialize a DP array dp where dp[k] will hold the number of ways to make sum k using the available coins. We set dp[0] = 1 because there is exactly one way to make sum 0, which is by not using any coins.
+
+Main DP Loop: For each coin type (denoted by Ai for value and Ci for count), we update the dp array:
+
+We iterate backwards over dp to ensure that we don't double count ways to make a sum (i.e., we don't count using more coins of a particular type than allowed).
+For each valid number of coins we can use (count), we update the corresponding dp values.
+Modulo Operation: Since the result can be large, every time we update dp[j], we take the result modulo 100000007.
+
+Output: For each test case, after processing all coin types, we output dp[K], which represents the number of ways to make the sum K.
+
+Time Complexity:
+Each test case involves iterating over all coin types and updating the dp array for sums from 0 to K. This results in a time complexity of:
+O(n * K * Ci), where n is the number of coin types, K is the target sum, and Ci is the maximum number of coins for the i-th type.
+Example Walkthrough:
+For the input:
+
+Copy code
+2
+3 5
+1 2 5 3 2 1
+4 20
+1 2 3 4 8 4 2 1
+Test Case 1:
+
+Coins: 1, 2, 5 with limits 3, 2, 1 respectively.
+We want to make 5:
+(1, 1, 1, 2)
+(1, 2, 2)
+(5)
+Answer is 3.
+Test Case 2:
+
+Coins: 1, 2, 3, 4 with limits 8, 4, 2, 1 respectively.
+We want to make 20:
+There are 9 ways to make 20.
+Answer is 9.
+Final Output:
+sql
+Copy code
+Case 1: 3
+Case 2: 9
+
+
